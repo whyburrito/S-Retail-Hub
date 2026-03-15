@@ -20,14 +20,6 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
 
   void login() async {
-    if (emailController.text == "admin@foodika.com" && passwordController.text == "admin") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const AdminDashboardPage()),
-      );
-      return;
-    }
-
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       setState(() => errorMessage = "Please fill in all fields.");
       return;
@@ -45,22 +37,23 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('Users')
           .doc(userCredential.user!.uid)
           .get();
 
       if (!mounted) return;
 
-      if (userDoc.exists && userDoc.get('role') == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AdminDashboardPage()),
-        );
+      if (userDoc.exists) {
+        String role = userDoc.get('role');
+
+        // STRICT ROLE-BASED ROUTING
+        if (role == 'Admin') {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AdminDashboardPage()));
+        } else {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const UserDashboardPage()));
+        }
       } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const UserDashboardPage()),
-        );
+        setState(() => errorMessage = "User record not found in database.");
       }
     } on FirebaseAuthException catch (e) {
       setState(() => errorMessage = e.message);
@@ -74,30 +67,33 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
-              Image.asset("assets/images/foodika_logo.png", height: 120),
-              const SizedBox(height: 30),
+              const SizedBox(height: 60),
+              // NEW LOGO
+              Image.asset("assets/images/s_retail_logo.png", height: 160),
+              const SizedBox(height: 20),
               const Text(
-                "Welcome Back!",
+                "S RETAIL STORE",
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFE46A3E),
+                  letterSpacing: 2.0,
+                  color: Color(0xFF002244),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
               TextField(
                 controller: emailController,
                 decoration: InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: const Icon(Icons.email),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                  labelText: "Email Address",
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
               ),
               const SizedBox(height: 15),
@@ -106,8 +102,8 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Password",
-                  prefixIcon: const Icon(Icons.lock),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
               ),
               const SizedBox(height: 15),
@@ -117,20 +113,16 @@ class _LoginPageState extends State<LoginPage> {
               ElevatedButton(
                 onPressed: isLoading ? null : login,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE46A3E),
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  minimumSize: const Size(double.infinity, 55),
                 ),
                 child: isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Login", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    : const Text("SIGN IN", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
               TextButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterPage()));
-                },
-                child: const Text("Don't have an account? Register", style: TextStyle(color: Color(0xFF2E7D32))),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterPage())),
+                child: const Text("Create an Account", style: TextStyle(color: Color(0xFFB8860B), fontWeight: FontWeight.bold)),
               ),
             ],
           ),

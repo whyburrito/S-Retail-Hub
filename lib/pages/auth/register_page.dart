@@ -11,7 +11,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final nameController = TextEditingController(); // NEW: Capture name early
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
@@ -21,7 +21,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void register() async {
     if (nameController.text.trim().isEmpty) {
-      setState(() => errorMessage = "Please enter your name.");
+      setState(() => errorMessage = "Please enter your full name.");
       return;
     }
     if (passwordController.text != confirmController.text) {
@@ -37,24 +37,22 @@ class _RegisterPageState extends State<RegisterPage> {
         password: passwordController.text.trim(),
       );
 
-      // Initialize the user document with loyalty and tracking fields
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+      await FirebaseFirestore.instance.collection('Users').doc(userCredential.user!.uid).set({
         'uid': userCredential.user!.uid,
         'name': nameController.text.trim(),
         'email': emailController.text.trim(),
-        'role': 'user',
-        'points': 0, // NEW: Initial points
-        'hasCompletedProfile': false, // NEW: Tracks if they earned the bonus
-        'createdAt': DateTime.now(),
+        'role': 'Consumer',
+        'points': 50,
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       if (mounted) {
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const UserDashboardPage()),
+              (route) => false,
         );
       }
-
     } on FirebaseAuthException catch (e) {
       setState(() => errorMessage = e.message ?? "An error occurred.");
     } catch (e) {
@@ -67,14 +65,21 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F8E9),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF002244)),
+      ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(25),
+          padding: const EdgeInsets.all(30),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset("assets/images/foodika_logo.png", width: 120),
+              const Icon(Icons.storefront, size: 80, color: Color(0xFFB8860B)),
+              const SizedBox(height: 20),
+              const Text("BECOME A MEMBER", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF002244), letterSpacing: 1.5)),
               const SizedBox(height: 30),
 
               TextField(
@@ -85,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               TextField(
                 controller: emailController,
-                decoration: const InputDecoration(labelText: "Email", border: OutlineInputBorder()),
+                decoration: const InputDecoration(labelText: "Email Address", border: OutlineInputBorder()),
               ),
               const SizedBox(height: 15),
 
@@ -110,13 +115,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 55,
                 child: ElevatedButton(
                   onPressed: isLoading ? null : register,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFB8860B)),
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Sign Up", style: TextStyle(color: Colors.white, fontSize: 18)),
+                      : const Text("CREATE ACCOUNT", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                 ),
               ),
             ],

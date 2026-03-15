@@ -4,60 +4,45 @@ class CartItem {
   final String id;
   final String name;
   final double price;
+  final int maxStock;
   int quantity;
 
-  CartItem({required this.id, required this.name, required this.price, this.quantity = 1});
+  CartItem({required this.id, required this.name, required this.price, required this.maxStock, this.quantity = 1});
 }
 
 class CartProvider extends ChangeNotifier {
   final Map<String, CartItem> _items = {};
-  double discountPercentage = 0.0;
-  String? appliedVoucherCode;
-  int appliedVoucherCost = 0; // NEW: Tracks the point cost of the voucher
-  String? currentRestaurantId;
 
   Map<String, CartItem> get items => _items;
   int get totalItems => _items.values.fold(0, (sum, item) => sum + item.quantity);
-  double get subtotal => _items.values.fold(0, (sum, item) => sum + (item.price * item.quantity));
-  double get total => subtotal * (1 - (discountPercentage / 100));
+  double get totalAmount => _items.values.fold(0, (sum, item) => sum + (item.price * item.quantity));
 
-  void addItem(String restaurantId, String id, String name, double price) {
-    if (currentRestaurantId != null && currentRestaurantId != restaurantId) {
-      _items.clear();
-      discountPercentage = 0.0;
-      appliedVoucherCode = null;
-      appliedVoucherCost = 0;
-    }
-    currentRestaurantId = restaurantId;
-
+  void addItem(String id, String name, double price, int maxStock) {
     if (_items.containsKey(id)) {
-      _items[id]!.quantity++;
+      if (_items[id]!.quantity < maxStock) {
+        _items[id]!.quantity++;
+      }
     } else {
-      _items[id] = CartItem(id: id, name: name, price: price);
+      if (maxStock > 0) {
+        _items[id] = CartItem(id: id, name: name, price: price, maxStock: maxStock);
+      }
     }
     notifyListeners();
   }
 
-  void removeItem(String id) {
-    _items.remove(id);
-    if (_items.isEmpty) currentRestaurantId = null;
-    notifyListeners();
-  }
+  void updateQuantity(String id, int newQuantity) {
+    if (!_items.containsKey(id)) return;
 
-  // NEW: Now requires the point cost when applying
-  void applyVoucher(String code, double percentage, int pointCost) {
-    appliedVoucherCode = code;
-    discountPercentage = percentage;
-    appliedVoucherCost = pointCost;
+    if (newQuantity <= 0) {
+      _items.remove(id);
+    } else if (newQuantity <= _items[id]!.maxStock) {
+      _items[id]!.quantity = newQuantity;
+    }
     notifyListeners();
   }
 
   void clear() {
     _items.clear();
-    discountPercentage = 0.0;
-    appliedVoucherCode = null;
-    appliedVoucherCost = 0;
-    currentRestaurantId = null;
     notifyListeners();
   }
 }

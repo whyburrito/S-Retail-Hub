@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: Image.asset(
-            "assets/images/foodika_logo.png",
+            "assets/images/s_retail_logo.png",
             width: 220,
           ),
         ),

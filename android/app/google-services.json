@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "630258486106",
-    "project_id": "foodika-database",
-    "storage_bucket": "foodika-database.firebasestorage.app"
+    "project_number": "372027806126",
+    "project_id": "fir-retail-hub-2ce37",
+    "storage_bucket": "fir-retail-hub-2ce37.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:630258486106:android:88e96c9b8fc6cfa8220163",
+        "mobilesdk_app_id": "1:372027806126:android:9ca9edd21b9e2c6c40f83f",
         "android_client_info": {
           "package_name": "com.example.foodika"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBo2a5QrHQv6ybrdKZ1-tLw9BOYk8uby_Q"
+          "current_key": "AIzaSyAMi7ihOoJQreXsF2sZXP7tm3U-LgKop5M"
         }
       ],
       "services": {

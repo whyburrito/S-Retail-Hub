@@ -34,9 +34,9 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/foodika_logo.png"
+  image_path: "assets/images/s_retail_logo.png"
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/foodika_logo.png
+    - assets/images/s_retail_logo.png
