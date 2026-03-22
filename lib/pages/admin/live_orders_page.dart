@@ -104,18 +104,18 @@ class LiveOrdersPage extends StatelessWidget {
                       const SizedBox(height: 10),
 
                       // List the items bought
-                      ...order.items.map((item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("${item.quantity}x ${item.name}"),
-                            Text("₱${(item.price * item.quantity).toStringAsFixed(2)}"),
-                          ],
+                      if (order.discountAmount > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Voucher: ${order.voucherName}", style: const TextStyle(color: Colors.green, fontSize: 13, fontStyle: FontStyle.italic)),
+                              Text("- ₱${order.discountAmount.toStringAsFixed(2)}", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
                         ),
-                      )),
 
-                      const Divider(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

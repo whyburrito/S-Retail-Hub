@@ -9,6 +9,7 @@ import '../auth/login_page.dart';
 import 'product_detail_page.dart';
 import 'cart_page.dart';
 import 'order_history_page.dart';
+import 'qr_scanner_page.dart';
 
 class UserDashboardPage extends StatefulWidget {
   const UserDashboardPage({super.key});
@@ -221,6 +222,12 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
             ),
           )
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MockQRScannerPage())),
+        backgroundColor: const Color(0xFF002244),
+        icon: const Icon(Icons.qr_code_scanner, color: Color(0xFFB8860B)),
+        label: const Text("In-Store Scan", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }

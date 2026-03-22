@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAMi7ihOoJQreXsF2sZXP7tm3U-LgKop5M',
-    appId: '1:372027806126:android:9ca9edd21b9e2c6c40f83f',
+    appId: '1:372027806126:android:16eaae4e36d3ca8640f83f',
     messagingSenderId: '372027806126',
     projectId: 'fir-retail-hub-2ce37',
     storageBucket: 'fir-retail-hub-2ce37.firebasestorage.app',
@@ -59,20 +59,20 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBtBM0qyZgbttJM36eg_hW2FNBO-CQnGnw',
-    appId: '1:372027806126:ios:e9a3b7d8b6fbe62e40f83f',
+    appId: '1:372027806126:ios:129268c6ee1d595840f83f',
     messagingSenderId: '372027806126',
     projectId: 'fir-retail-hub-2ce37',
     storageBucket: 'fir-retail-hub-2ce37.firebasestorage.app',
-    iosBundleId: 'com.example.foodika',
+    iosBundleId: 'com.example.sRetailStore',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyBtBM0qyZgbttJM36eg_hW2FNBO-CQnGnw',
-    appId: '1:372027806126:ios:e9a3b7d8b6fbe62e40f83f',
+    appId: '1:372027806126:ios:129268c6ee1d595840f83f',
     messagingSenderId: '372027806126',
     projectId: 'fir-retail-hub-2ce37',
     storageBucket: 'fir-retail-hub-2ce37.firebasestorage.app',
-    iosBundleId: 'com.example.foodika',
+    iosBundleId: 'com.example.sRetailStore',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -83,5 +83,4 @@ class DefaultFirebaseOptions {
     authDomain: 'fir-retail-hub-2ce37.firebaseapp.com',
     storageBucket: 'fir-retail-hub-2ce37.firebasestorage.app',
   );
-
 }

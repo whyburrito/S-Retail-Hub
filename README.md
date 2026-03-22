@@ -1,4 +1,4 @@
-# foodika
+# s_retail_store
 
 A new Flutter project.
 

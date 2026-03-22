@@ -33,7 +33,7 @@ class OrderItem {
 }
 
 class OrderModel {
-  String? id; // The document ID from Firestore
+  String? id;
   String userId;
   String branchId;
   List<OrderItem> items;
@@ -41,6 +41,8 @@ class OrderModel {
   String status;
   String orderType;
   DateTime timestamp;
+  String? voucherName;
+  double discountAmount;
 
   OrderModel({
     this.id,
@@ -51,10 +53,11 @@ class OrderModel {
     required this.status,
     required this.orderType,
     required this.timestamp,
+    this.voucherName,
+    this.discountAmount = 0.0,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> data, String documentId) {
-    // Safely map the array of JSON items into a List of OrderItem objects
     var itemsList = data['items'] as List? ?? [];
     List<OrderItem> mappedItems = itemsList.map((item) => OrderItem.fromMap(item)).toList();
 
@@ -67,6 +70,8 @@ class OrderModel {
       status: data['status'] ?? 'Pending',
       orderType: data['orderType'] ?? 'In-Store Pickup',
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      voucherName: data['voucherName'],
+      discountAmount: (data['discountAmount'] ?? 0.0).toDouble(),
     );
   }
 
@@ -79,6 +84,8 @@ class OrderModel {
       'status': status,
       'orderType': orderType,
       'timestamp': Timestamp.fromDate(timestamp),
+      'voucherName': voucherName,
+      'discountAmount': discountAmount,
     };
   }
 }

@@ -1,4 +1,4 @@
-package com.example.foodika
+package com.example.s_retail_store
 
 import io.flutter.embedding.android.FlutterActivity
 

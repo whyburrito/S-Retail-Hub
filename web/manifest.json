@@ -1,6 +1,6 @@
 {
-    "name": "foodika",
-    "short_name": "foodika",
+    "name": "s_retail_store",
+    "short_name": "s_retail_store",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -37,12 +37,14 @@ class _CartPageState extends State<CartPage> {
       OrderModel newOrder = OrderModel(
         id: orderId,
         userId: user.uid,
-        branchId: "branch_main", // B2C Single Ecosystem assumption
+        branchId: "branch_main",
         items: orderItems,
-        totalAmount: cart.totalAmount,
+        totalAmount: cart.finalTotal,
         status: "Pending",
         orderType: "Delivery",
         timestamp: DateTime.now(),
+        voucherName: cart.appliedVoucherName,
+        discountAmount: cart.discountAmount,
       );
 
       // 💥 THE FIRESTORE TRANSACTION (Crucial for Rubric)
@@ -117,11 +119,69 @@ class _CartPageState extends State<CartPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  InkWell(
+                    onTap: () {
+                      if (cart.appliedVoucherName == null) {
+                        cart.applyVoucher("50% OFF (Cap ₱500)", 0.50, 500.0);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Voucher Applied!"), backgroundColor: Colors.green));
+                      } else {
+                        cart.removeVoucher();
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      margin: const EdgeInsets.only(bottom: 15),
+                      decoration: BoxDecoration(
+                        color: cart.appliedVoucherName == null ? Colors.grey.shade100 : Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: cart.appliedVoucherName == null ? Colors.grey.shade300 : Colors.green),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.local_activity, color: cart.appliedVoucherName == null ? Colors.grey : Colors.green),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              cart.appliedVoucherName ?? "Select or enter a voucher",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: cart.appliedVoucherName == null ? Colors.black87 : Colors.green),
+                            ),
+                          ),
+                          if (cart.appliedVoucherName != null)
+                            const Icon(Icons.check_circle, color: Colors.green)
+                          else
+                            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // SUBTOTAL & DISCOUNT
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Subtotal", style: TextStyle(color: Colors.grey)),
+                      Text("₱${cart.subtotal.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  if (cart.discountAmount > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Voucher Discount", style: TextStyle(color: Colors.green)),
+                          Text("- ₱${cart.discountAmount.toStringAsFixed(2)}", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  const Divider(height: 20),
+
+                  // FINAL TOTAL
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text("Total Amount", style: TextStyle(fontSize: 18, color: Colors.grey)),
-                      Text("₱${cart.totalAmount.toStringAsFixed(2)}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF002244))),
+                      Text("₱${cart.finalTotal.toStringAsFixed(2)}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF002244))),
                     ],
                   ),
                   const SizedBox(height: 15),
