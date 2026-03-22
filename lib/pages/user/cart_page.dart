@@ -22,7 +22,6 @@ class _CartPageState extends State<CartPage> {
     setState(() => isCheckingOut = true);
 
     try {
-      // 1. Fetch the user's actual name from the database
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
       String customerName = "Shopper";
       if (userDoc.exists) {
@@ -41,7 +40,7 @@ class _CartPageState extends State<CartPage> {
       OrderModel newOrder = OrderModel(
         id: orderId,
         userId: user.uid,
-        userName: customerName, // <--- INJECT THE NAME HERE
+        userName: customerName,
         branchId: "branch_main",
         items: orderItems,
         totalAmount: cart.finalTotal,
@@ -52,10 +51,15 @@ class _CartPageState extends State<CartPage> {
         discountAmount: cart.discountAmount,
       );
 
-      // 💥 THE FIRESTORE TRANSACTION (Crucial for Rubric)
-      // This ensures stock is deducted safely and the order is created at the exact same time.
+      // 💥 THE FIRESTORE TRANSACTION
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        // 1. Read all products to ensure enough stock exists
+
+        // ==========================================
+        // --- PHASE 1: ALL READS FIRST ---
+        // ==========================================
+        Map<DocumentReference, int> pendingStockUpdates = {};
+
+        // Read 1: Check all product stock
         for (var item in orderItems) {
           DocumentReference productRef = FirebaseFirestore.instance.collection('Products').doc(item.productId);
           DocumentSnapshot productSnapshot = await transaction.get(productRef);
@@ -65,13 +69,44 @@ class _CartPageState extends State<CartPage> {
           int currentStock = productSnapshot.get('stockQuantity');
           if (currentStock < item.quantity) throw Exception("Not enough stock for ${item.name}. Only $currentStock left.");
 
-          // Deduct stock
-          transaction.update(productRef, {'stockQuantity': currentStock - item.quantity});
+          pendingStockUpdates[productRef] = currentStock - item.quantity;
         }
 
-        // 2. Write the new Order to the master node
+        // Read 2: Check user's wallet for the voucher BEFORE writing anything
+        DocumentSnapshot? latestUserSnap;
+        DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
+        if (cart.appliedVoucherName != null) {
+          latestUserSnap = await transaction.get(userRef);
+        }
+
+
+        // ==========================================
+        // --- PHASE 2: ALL WRITES ---
+        // ==========================================
+
+        // Write 1: Update Stock
+        pendingStockUpdates.forEach((ref, newStock) {
+          transaction.update(ref, {'stockQuantity': newStock});
+        });
+
+        // Write 2: Save the Order
         DocumentReference orderRef = FirebaseFirestore.instance.collection('Orders').doc(orderId);
         transaction.set(orderRef, newOrder.toMap());
+
+        // Write 3: Burn the Voucher
+        if (cart.appliedVoucherName != null && latestUserSnap != null) {
+          var userData = latestUserSnap.data() as Map<String, dynamic>? ?? {};
+
+          if (userData.containsKey('ownedVouchers')) {
+            List vouchers = List.from(userData['ownedVouchers']);
+            // Find the specific voucher and remove it
+            int vIndex = vouchers.indexWhere((v) => v['name'] == cart.appliedVoucherName);
+            if (vIndex != -1) {
+              vouchers.removeAt(vIndex);
+              transaction.update(userRef, {'ownedVouchers': vouchers});
+            }
+          }
+        }
       });
 
       // Cleanup & Success
@@ -85,6 +120,56 @@ class _CartPageState extends State<CartPage> {
     } finally {
       if (mounted) setState(() => isCheckingOut = false);
     }
+  }
+
+  // --- NEW: DYNAMIC VOUCHER MENU ---
+  void _openVoucherMenu(CartProvider cart) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    var doc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+    var data = doc.data() as Map<String, dynamic>? ?? {};
+    List owned = data.containsKey('ownedVouchers') ? data['ownedVouchers'] : [];
+
+    if (owned.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You don't have any vouchers! Scan QR codes and visit the Rewards Hub.", style: TextStyle(color: Colors.white)), backgroundColor: Colors.redAccent));
+      return;
+    }
+
+    if (!mounted) return;
+    showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (context) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("My Vouchers", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 15),
+                ...owned.map((v) => Card(
+                  elevation: 2,
+                  child: ListTile(
+                    leading: const Icon(Icons.local_activity, color: Colors.green),
+                    title: Text(v['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text("Cap: ₱${v['maxCap']}"),
+                    trailing: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF002244)),
+                      onPressed: () {
+                        cart.applyVoucher(v['name'], (v['discountPercent'] ?? 0.0).toDouble(), (v['maxCap'] ?? 0.0).toDouble());
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Apply"),
+                    ),
+                  ),
+                )),
+              ],
+            ),
+          );
+        }
+    );
   }
 
   @override
@@ -124,13 +209,13 @@ class _CartPageState extends State<CartPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // DYNAMIC VOUCHER BUTTON
                   InkWell(
                     onTap: () {
                       if (cart.appliedVoucherName == null) {
-                        cart.applyVoucher("50% OFF (Cap ₱500)", 0.50, 500.0);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Voucher Applied!"), backgroundColor: Colors.green));
+                        _openVoucherMenu(cart); // OPENS THE REAL MENU
                       } else {
-                        cart.removeVoucher();
+                        cart.removeVoucher(); // REMOVES IT
                       }
                     },
                     child: Container(
@@ -152,7 +237,7 @@ class _CartPageState extends State<CartPage> {
                             ),
                           ),
                           if (cart.appliedVoucherName != null)
-                            const Icon(Icons.check_circle, color: Colors.green)
+                            const Icon(Icons.cancel, color: Colors.grey)
                           else
                             const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
                         ],

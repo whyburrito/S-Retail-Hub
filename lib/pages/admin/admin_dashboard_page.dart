@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import '../auth/login_page.dart';
 import 'inventory_page.dart';
 import 'live_orders_page.dart';
+import 'admin_vouchers_page.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -19,11 +20,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   final List<Widget> pages = [
     const InventoryPage(),
     const LiveOrdersPage(),
+    const AdminVouchersPage(),
   ];
 
   final List<String> titles = [
     "Inventory Management",
     "Live Orders Feed",
+    "Voucher Management",
   ];
 
   void logout() async {
@@ -125,6 +128,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   }
               ),
               onTap: () { setState(() => selectedIndex = 1); Navigator.pop(context); },
+            ),
+            ListTile(
+              leading: const Icon(Icons.local_activity_outlined, color: Color(0xFF002244)),
+              title: const Text("Vouchers", style: TextStyle(fontWeight: FontWeight.bold)),
+              selected: selectedIndex == 2,
+              selectedTileColor: Colors.grey.shade200,
+              onTap: () { setState(() => selectedIndex = 2); Navigator.pop(context); },
             ),
             const Spacer(),
             const Divider(),

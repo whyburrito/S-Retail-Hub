@@ -10,6 +10,7 @@ import 'product_detail_page.dart';
 import 'cart_page.dart';
 import 'order_history_page.dart';
 import 'qr_scanner_page.dart';
+import 'rewards_page.dart';
 
 class UserDashboardPage extends StatefulWidget {
   const UserDashboardPage({super.key});
@@ -89,6 +90,11 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
                   ),
                 ),
               ),
+            ),
+            ListTile(
+                leading: const Icon(Icons.stars, color: Color(0xFFB8860B)),
+                title: const Text("Rewards Hub"),
+                onTap: () { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (_) => const RewardsPage())); }
             ),
             ListTile(leading: const Icon(Icons.history), title: const Text("My Orders"), onTap: () { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (_) => const OrderHistoryPage())); }),
             const Divider(),
