@@ -59,7 +59,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/yourusername/S-Retail-Hub.git](https://github.com/yourusername/S-Retail-Hub.git)
+   git clone https://github.com/whyburrito/S-Retail-Hub.git
    cd S-Retail-Hub
    ```
 
