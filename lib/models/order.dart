@@ -43,6 +43,7 @@ class OrderModel {
   DateTime timestamp;
   String? voucherName;
   double discountAmount;
+  String? userName;
 
   OrderModel({
     this.id,
@@ -55,6 +56,7 @@ class OrderModel {
     required this.timestamp,
     this.voucherName,
     this.discountAmount = 0.0,
+    this.userName,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> data, String documentId) {
@@ -72,6 +74,7 @@ class OrderModel {
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
       voucherName: data['voucherName'],
       discountAmount: (data['discountAmount'] ?? 0.0).toDouble(),
+      userName: data['userName'],
     );
   }
 
@@ -86,6 +89,7 @@ class OrderModel {
       'timestamp': Timestamp.fromDate(timestamp),
       'voucherName': voucherName,
       'discountAmount': discountAmount,
+      'userName': userName,
     };
   }
 }

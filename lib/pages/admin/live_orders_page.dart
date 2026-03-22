@@ -103,7 +103,18 @@ class LiveOrdersPage extends StatelessWidget {
                       Text("Date: ${DateFormat('MMM dd, hh:mm a').format(order.timestamp)}", style: const TextStyle(color: Colors.grey, fontSize: 12)),
                       const SizedBox(height: 10),
 
-                      // List the items bought
+                      ...order.items.map((item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Row(
+                          children: [
+                            Text("${item.quantity}x ", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFB8860B))),
+                            Expanded(child: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                            Text("₱${(item.price * item.quantity).toStringAsFixed(2)}"),
+                          ],
+                        ),
+                      )),
+                      const Divider(),
+
                       if (order.discountAmount > 0)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 6.0),

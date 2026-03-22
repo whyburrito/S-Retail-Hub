@@ -22,10 +22,15 @@ class _CartPageState extends State<CartPage> {
     setState(() => isCheckingOut = true);
 
     try {
-      // Create a master order ID
+      // 1. Fetch the user's actual name from the database
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+      String customerName = "Shopper";
+      if (userDoc.exists) {
+        customerName = (userDoc.data() as Map<String, dynamic>)['name'] ?? user.email!.split('@')[0];
+      }
+
       final String orderId = FirebaseFirestore.instance.collection('Orders').doc().id;
 
-      // Convert CartItems to OrderItems
       List<OrderItem> orderItems = cart.items.values.map((item) => OrderItem(
         productId: item.id,
         name: item.name,
@@ -33,10 +38,10 @@ class _CartPageState extends State<CartPage> {
         price: item.price,
       )).toList();
 
-      // Create the Order Model Blueprint
       OrderModel newOrder = OrderModel(
         id: orderId,
         userId: user.uid,
+        userName: customerName, // <--- INJECT THE NAME HERE
         branchId: "branch_main",
         items: orderItems,
         totalAmount: cart.finalTotal,
